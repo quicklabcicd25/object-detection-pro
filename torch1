@@ -1,0 +1,88 @@
+import torch
+import torchvision
+from torchvision.transforms import functional as F
+import cv2
+import numpy as np
+import random
+import math
+
+# Load pre-trained Faster R-CNN model
+model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+model.eval()
+
+# COCO class names (91 classes)
+COCO_INSTANCE_CATEGORY_NAMES = [
+    '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
+    'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
+    'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+    'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella',
+    'N/A', 'N/A', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard',
+    'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard',
+    'surfboard', 'tennis racket', 'bottle', 'N/A', 'wine glass', 'cup', 'fork',
+    'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange',
+    'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+    'potted plant', 'bed', 'N/A', 'dining table', 'N/A', 'N/A', 'toilet',
+    'N/A', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+    'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
+    'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+]
+
+colorcodes = {}
+
+def drawbox(image, box, label, score, color):
+    xmin, ymin, xmax, ymax = box
+    left, top, right, bottom = int(xmin), int(ymin), int(xmax), int(ymax)
+
+    cv2.rectangle(image, (left, top), (right, bottom), color=color, thickness=2)
+
+    FONT_SCALE = 5e-3
+    THICKNESS_SCALE = 4e-3
+    width, height = right - left, bottom - top
+    TEXT_Y_OFFSET_SCALE = 1e-2
+
+    cv2.rectangle(image, (left, top - int(height * 6e-2)), (right, top), color=color, thickness=-1)
+    label_text = f"{label}: {int(score * 100)}"
+    cv2.putText(image, label_text, (left, top - int(height * TEXT_Y_OFFSET_SCALE)),
+                fontFace=cv2.FONT_HERSHEY_PLAIN,
+                fontScale=min(width, height) * FONT_SCALE,
+                thickness=math.ceil(min(width, height) * THICKNESS_SCALE),
+                color=(255, 255, 255))
+
+
+def detect_and_draw(image, outputs, threshold=0.5):
+    boxes = outputs[0]['boxes'].detach().numpy()
+    scores = outputs[0]['scores'].detach().numpy()
+    labels = outputs[0]['labels'].detach().numpy()
+
+    for i in range(len(boxes)):
+        if scores[i] >= threshold:
+            label = COCO_INSTANCE_CATEGORY_NAMES[labels[i]]
+            if label not in colorcodes:
+                colorcodes[label] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            drawbox(image, boxes[i], label, scores[i], colorcodes[label])
+
+    return image
+
+
+# Load video
+video = cv2.VideoCapture("D:\object detection pro\People walk in garden.mp4")
+
+while True:
+    ret, frame = video.read()
+    if not ret:
+        break
+
+    frame = cv2.resize(frame, (900, 700))
+    img_tensor = F.to_tensor(frame).unsqueeze(0)
+
+    with torch.no_grad():
+        outputs = model(img_tensor)
+
+    output_img = detect_and_draw(frame, outputs)
+
+    cv2.imshow("Detection", output_img)
+    if cv2.waitKey(27) & 0xFF == 27:
+        break
+
+video.release()
+cv2.destroyAllWindows()
