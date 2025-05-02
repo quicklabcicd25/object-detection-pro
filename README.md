@@ -29,7 +29,7 @@ TensorFlow: Custom model loaded via hub.load()
 PyTorch: Pretrained Faster R-CNN ResNet50 FPN from torchvision.models.detection
 🎥 Sample Output:
 ![iamge alt](https://github.com/quicklabcicd25/object-detection-pro/blob/9f6ad0d6cb87adb8db5ff3ee65455f5c58038289/detected4.png)
-![iamge alt]
+![iamge alt](https://github.com/quicklabcicd25/object-detection-pro/blob/77667ca78d9f4ea6a7778f37bd4c0619dce4942d/detected3.png)
 
 
 
