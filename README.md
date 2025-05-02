@@ -31,6 +31,23 @@ PyTorch: Pretrained Faster R-CNN ResNet50 FPN from torchvision.models.detection
 ![iamge alt](https://github.com/quicklabcicd25/object-detection-pro/blob/9f6ad0d6cb87adb8db5ff3ee65455f5c58038289/detected4.png)
 ![iamge alt](https://github.com/quicklabcicd25/object-detection-pro/blob/77667ca78d9f4ea6a7778f37bd4c0619dce4942d/detected3.png)
 
+📌 Notes:
+For real-time webcam detection, you can replace the video source with cv2.VideoCapture(0).
+
+This project is ideal for beginners exploring object detection pipelines using pretrained models.
+📚 References
+TensorFlow Hub
+Torchvision Detection Models
+OpenCV Documentation
+
+💡 Future Improvements
+Add YOLOv5/YOLOv8 support for faster detection
+
+Deploy using Streamlit or Flask for web interface
+
+Add FPS counter for performance monitoring
+
+
 
 
 
